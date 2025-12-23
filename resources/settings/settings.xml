@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<settings>
+    <!--
+    App Settings
+
+    These settings can be configured via Garmin Connect Mobile or Garmin Express.
+    -->
+
+    <!-- Haptic Feedback Setting -->
+    <setting propertyKey="@Properties.hapticEnabled" title="@Strings.HapticFeedback">
+        <settingConfig type="boolean"/>
+    </setting>
+</settings>

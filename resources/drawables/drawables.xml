@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<drawables>
+    <!--
+    Launcher Icon
+
+    TODO: Add launcher_icon.png (60x60 pixels)
+
+    For production, you need to provide:
+    - launcher_icon.png (primary icon)
+
+    The icon should:
+    - Use the AmakaFlow brand colors (#3B82F6)
+    - Be recognizable at small sizes
+    - Have transparency where appropriate
+    -->
+    <!-- Uncomment when icon file is added:
+    <bitmap id="LauncherIcon" filename="launcher_icon.png"/>
+    -->
+</drawables>

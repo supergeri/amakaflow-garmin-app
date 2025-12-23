@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layouts>
+    <!--
+    Layout definitions for AmakaFlow Workout Remote
+
+    Note: This app uses programmatic layout in WorkoutRemoteView.mc
+    for maximum flexibility across different screen sizes and shapes.
+
+    These layouts are reserved for future use with standardized UI components.
+    -->
+</layouts>

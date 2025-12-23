@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<strings>
+    <string id="AppName">AmakaFlow</string>
+    <string id="AppDescription">Remote control for AmakaFlow workouts</string>
+
+    <!-- Workout States -->
+    <string id="NoActiveWorkout">No Active Workout</string>
+    <string id="StartOnPhone">Start on iPhone</string>
+    <string id="WorkoutComplete">Complete!</string>
+    <string id="GreatWorkout">Great workout!</string>
+    <string id="Paused">PAUSED</string>
+
+    <!-- Confirmations -->
+    <string id="EndWorkout">End Workout?</string>
+    <string id="Yes">Yes</string>
+    <string id="No">No</string>
+
+    <!-- Connection -->
+    <string id="Connecting">Connecting...</string>
+    <string id="Disconnected">Disconnected</string>
+    <string id="Connected">Connected</string>
+
+    <!-- Errors -->
+    <string id="ConnectionError">Connection Error</string>
+    <string id="RetryConnection">Retry</string>
+
+    <!-- Settings -->
+    <string id="HapticFeedback">Haptic Feedback</string>
+</strings>

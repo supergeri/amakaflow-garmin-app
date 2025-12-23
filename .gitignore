@@ -1,0 +1,26 @@
+# Build outputs
+bin/
+*.prg
+
+# Developer key (DO NOT COMMIT)
+*.der
+developer_key.der
+
+# IDE
+.vscode/
+*.code-workspace
+
+# Connect IQ SDK
+.connectiq/
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak

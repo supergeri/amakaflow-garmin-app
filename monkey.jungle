@@ -1,0 +1,12 @@
+# AmakaFlow Workout Remote - Build Configuration
+# For Garmin Connect IQ SDK
+
+project.manifest = manifest.xml
+
+# Base configuration
+base.sourcePath = source
+base.resourcePath = resources
+
+# Device-specific optimizations can be added here
+# Example:
+# fenix7.resourcePath = $(base.resourcePath);resources-fenix7
