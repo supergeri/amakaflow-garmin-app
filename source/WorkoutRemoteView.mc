@@ -54,7 +54,7 @@ class WorkoutRemoteView extends WatchUi.View {
             var ph = comm.isPhoneAvailable() ? "Y" : "N";
             var ap = comm.isPhoneConnected() ? "Y" : "N";
             dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(cx, cy + 90, Graphics.FONT_XTINY, "v1.0.12  Ph:" + ph + "  App:" + ap, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawText(cx, cy + 90, Graphics.FONT_XTINY, "v" + APP_VERSION + "  Ph:" + ph + "  App:" + ap, Graphics.TEXT_JUSTIFY_CENTER);
         }
     }
 
@@ -189,7 +189,7 @@ class WorkoutRemoteView extends WatchUi.View {
             if (state == null || state.isIdle()) {
                 // Version at very bottom
                 dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-                dc.drawText(width / 2, height - 18, Graphics.FONT_XTINY, "v1.0.12", Graphics.TEXT_JUSTIFY_CENTER);
+                dc.drawText(width / 2, height - 18, Graphics.FONT_XTINY, "v" + APP_VERSION, Graphics.TEXT_JUSTIFY_CENTER);
             }
         } else {
             dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);

@@ -72,6 +72,18 @@ class CommManager {
         transmitMessage(message);
     }
 
+    //! Send pong response to iOS ping
+    function sendPong(pingTimestamp) {
+        System.println("[COMM] sendPong called");
+
+        var message = {
+            "action" => "pong",
+            "pingTimestamp" => pingTimestamp,
+            "pongTimestamp" => System.getTimer()
+        };
+        transmitMessage(message);
+    }
+
     hidden function transmitMessage(message) {
         transmitAttempts++;
         lastTransmitTime = System.getTimer();

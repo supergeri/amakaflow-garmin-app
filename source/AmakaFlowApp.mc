@@ -5,6 +5,9 @@ using Toybox.System;
 using Toybox.Lang;
 using Toybox.Attention;
 
+//! App version - update here and in manifest.xml
+const APP_VERSION = "1.0.14";
+
 //! Main application class for AmakaFlow Workout Remote
 class AmakaFlowApp extends Application.AppBase {
 
@@ -85,6 +88,18 @@ class AmakaFlowApp extends Application.AppBase {
                 var commandId = data.get("commandId");
                 var status = data.get("status");
                 System.println("[APP] Command " + commandId + " status: " + status);
+            } else if (action != null && action.equals("ping")) {
+                System.println("[APP] ===== PING RECEIVED! =====");
+                var timestamp = data.get("timestamp");
+                System.println("[APP] Ping timestamp: " + timestamp);
+                // Send pong response back to iOS
+                if (commManager != null) {
+                    commManager.sendPong(timestamp);
+                }
+                // Extra vibration to confirm ping
+                if (Attention has :vibrate) {
+                    Attention.vibrate([new Attention.VibeProfile(100, 300)]);
+                }
             } else {
                 System.println("[APP] Unknown action: " + action);
             }
