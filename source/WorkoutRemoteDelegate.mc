@@ -16,7 +16,10 @@ class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
     }
 
     //! Top right START button - End workout (with confirmation)
+    //! Note: This is ONLY for the physical START button, not screen taps
     function onSelect() {
+        System.println("[UI] onSelect called (START button)");
+
         // In demo mode, cycle screens
         if (WorkoutRemoteView.demoMode) {
             WorkoutRemoteView.nextDemoScreen();
@@ -28,6 +31,7 @@ class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
         var state = app.getWorkoutState();
 
         if (state != null && state.isActive()) {
+            // Only end workout from physical START button
             var dialog = new WatchUi.Confirmation("End Workout?");
             WatchUi.pushView(dialog, new EndWorkoutConfirmDelegate(comm), WatchUi.SLIDE_UP);
             return true;
@@ -181,9 +185,35 @@ class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
         return false;
     }
 
-    //! Tap on screen = Pause/Resume (same as UP button)
+    //! Tap on screen = Pause/Resume
     function onTap(evt) {
-        return onPreviousPage();
+        System.println("[UI] onTap called (screen tap)");
+
+        // In demo mode, cycle screens
+        if (WorkoutRemoteView.demoMode) {
+            WorkoutRemoteView.nextDemoScreen();
+            vibrate();
+            return true;
+        }
+
+        var app = getApp();
+        var state = app.getWorkoutState();
+
+        if (state != null) {
+            if (state.isRunning()) {
+                System.println("[UI] Tap -> PAUSE");
+                sendCommand("PAUSE");
+                vibrate();
+                return true;
+            } else if (state.isPaused()) {
+                System.println("[UI] Tap -> RESUME");
+                sendCommand("RESUME");
+                vibrate();
+                return true;
+            }
+        }
+
+        return true;
     }
 
     hidden function sendCommand(command) {
