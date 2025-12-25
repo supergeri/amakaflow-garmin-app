@@ -6,7 +6,7 @@ using Toybox.Lang;
 using Toybox.Attention;
 
 //! App version - update here and in manifest.xml
-const APP_VERSION = "1.0.14";
+const APP_VERSION = "1.0.15";
 
 //! Main application class for AmakaFlow Workout Remote
 class AmakaFlowApp extends Application.AppBase {
