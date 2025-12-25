@@ -38,14 +38,24 @@ class WorkoutRemoteView extends WatchUi.View {
 
     hidden function drawIdleState(dc, cx, cy) {
         dc.setColor(BRAND_COLOR, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy - 40, Graphics.FONT_MEDIUM, "AmakaFlow", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, cy - 70, Graphics.FONT_MEDIUM, "AmakaFlow", Graphics.TEXT_JUSTIFY_CENTER);
 
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy, Graphics.FONT_SMALL, "No Active", Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(cx, cy + 25, Graphics.FONT_SMALL, "Workout", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, cy - 5, Graphics.FONT_SMALL, "No Active", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, cy + 30, Graphics.FONT_SMALL, "Workout", Graphics.TEXT_JUSTIFY_CENTER);
 
         dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy + 60, Graphics.FONT_XTINY, "Start on iPhone", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, cy + 65, Graphics.FONT_XTINY, "Start on iPhone", Graphics.TEXT_JUSTIFY_CENTER);
+
+        // Version and connection status below "Start on iPhone"
+        var app = getApp();
+        var comm = app.getCommManager();
+        if (comm != null) {
+            var ph = comm.isPhoneAvailable() ? "Y" : "N";
+            var ap = comm.isPhoneConnected() ? "Y" : "N";
+            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(cx, cy + 90, Graphics.FONT_XTINY, "v" + APP_VERSION + "  Ph:" + ph + "  App:" + ap, Graphics.TEXT_JUSTIFY_CENTER);
+        }
     }
 
     hidden function drawCompleteState(dc, cx, cy) {
@@ -66,27 +76,34 @@ class WorkoutRemoteView extends WatchUi.View {
             return;
         }
 
+        // Step name at top (adjusted for round displays)
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        var stepNameY = 35;
-        dc.drawText(cx, stepNameY, Graphics.FONT_SMALL, truncateText(state.stepName, 18), Graphics.TEXT_JUSTIFY_CENTER);
+        var stepNameY = 42;
+        dc.drawText(cx, stepNameY, Graphics.FONT_SMALL, truncateText(state.stepName, 16), Graphics.TEXT_JUSTIFY_CENTER);
 
+        // Round info below step name
+        var roundInfoY = stepNameY + 24;
         if (state.roundInfo != null && !state.roundInfo.equals("")) {
             dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(cx, stepNameY + 22, Graphics.FONT_XTINY, state.roundInfo, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawText(cx, roundInfoY, Graphics.FONT_XTINY, state.roundInfo, Graphics.TEXT_JUSTIFY_CENTER);
         }
 
+        // Main display (timer or step count) - centered vertically
         if (state.isTimedStep()) {
-            drawTimerDisplay(dc, cx, cy);
+            drawTimerDisplay(dc, cx, cy + 5);
         } else {
-            drawStepCountDisplay(dc, cx, cy);
+            drawStepCountDisplay(dc, cx, cy + 5);
         }
 
+        // Progress bar near bottom
         drawProgressBar(dc, width, height);
 
+        // Paused indicator above progress bar
         if (state.isPaused()) {
             drawPausedIndicator(dc, cx, height);
         }
 
+        // Button hints on sides
         drawButtonHints(dc, width, height);
     }
 
@@ -107,11 +124,13 @@ class WorkoutRemoteView extends WatchUi.View {
             return;
         }
 
+        // Step number - large centered display
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy - 15, Graphics.FONT_NUMBER_MEDIUM, (state.stepIndex + 1).toString(), Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, cy - 25, Graphics.FONT_NUMBER_MEDIUM, (state.stepIndex + 1).toString(), Graphics.TEXT_JUSTIFY_CENTER);
 
+        // "of X" - positioned well below the number with smaller font
         dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy + 25, Graphics.FONT_SMALL, "of " + state.stepCount.toString(), Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, cy + 35, Graphics.FONT_XTINY, "of " + state.stepCount.toString(), Graphics.TEXT_JUSTIFY_CENTER);
     }
 
     hidden function drawProgressBar(dc, width, height) {
@@ -135,8 +154,9 @@ class WorkoutRemoteView extends WatchUi.View {
     }
 
     hidden function drawPausedIndicator(dc, cx, height) {
+        // Draw paused indicator above progress bar
         dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, height - 70, Graphics.FONT_XTINY, "PAUSED", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, height - 65, Graphics.FONT_XTINY, "PAUSED", Graphics.TEXT_JUSTIFY_CENTER);
     }
 
     hidden function drawButtonHints(dc, width, height) {
@@ -145,17 +165,59 @@ class WorkoutRemoteView extends WatchUi.View {
         }
 
         dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(width - 8, 50, Graphics.FONT_XTINY, "<", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(width - 8, height - 60, Graphics.FONT_XTINY, ">", Graphics.TEXT_JUSTIFY_RIGHT);
+
+        // Top right button = END
+        dc.drawText(width - 10, 45, Graphics.FONT_XTINY, "END", Graphics.TEXT_JUSTIFY_RIGHT);
+
+        // Bottom right button = NEXT (arrow pointing right/forward)
+        dc.drawText(width - 10, height - 55, Graphics.FONT_XTINY, "NEXT>", Graphics.TEXT_JUSTIFY_RIGHT);
+
+        // Bottom left button = PREV (arrow pointing left/back)
+        dc.drawText(10, height - 55, Graphics.FONT_XTINY, "<PREV", Graphics.TEXT_JUSTIFY_LEFT);
+
+        // Middle left button = PAUSE/RESUME (show current action available)
+        if (state.isRunning()) {
+            dc.drawText(10, height / 2 - 10, Graphics.FONT_XTINY, "PAUSE", Graphics.TEXT_JUSTIFY_LEFT);
+        } else if (state.isPaused()) {
+            dc.drawText(10, height / 2 - 10, Graphics.FONT_XTINY, "PLAY", Graphics.TEXT_JUSTIFY_LEFT);
+        }
     }
 
     hidden function drawConnectionStatus(dc, width) {
         var app = getApp();
         var comm = app.getCommManager();
+        var height = dc.getHeight();
 
-        if (comm != null && !comm.isPhoneConnected()) {
+        // Show phone connection status
+        if (comm != null) {
+            var phoneAvailable = comm.isPhoneAvailable();
+            var appConnected = comm.isPhoneConnected();
+
+            // Phone status indicator (top right) - green if connected
+            if (phoneAvailable) {
+                dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
+            } else {
+                dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
+            }
+            dc.fillCircle(width - 15, 15, 5);
+
+            // App connection status (below phone indicator)
+            if (appConnected) {
+                dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
+            } else {
+                dc.setColor(Graphics.COLOR_ORANGE, Graphics.COLOR_TRANSPARENT);
+            }
+            dc.fillCircle(width - 15, 30, 4);
+
+            // Show version and connection status only when idle
+            if (state == null || state.isIdle()) {
+                // Version at very bottom
+                dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
+                dc.drawText(width / 2, height - 18, Graphics.FONT_XTINY, "v" + APP_VERSION, Graphics.TEXT_JUSTIFY_CENTER);
+            }
+        } else {
             dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
-            dc.fillCircle(width - 15, 15, 4);
+            dc.fillCircle(width - 15, 15, 5);
         }
     }
 

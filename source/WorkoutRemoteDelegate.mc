@@ -12,27 +12,45 @@ class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
         comm = commManager;
     }
 
+    //! Top right START button - End workout (with confirmation)
     function onSelect() {
+        var app = getApp();
+        var state = app.getWorkoutState();
+
+        if (state != null && state.isActive()) {
+            var dialog = new WatchUi.Confirmation("End Workout?");
+            WatchUi.pushView(dialog, new EndWorkoutConfirmDelegate(comm), WatchUi.SLIDE_UP);
+            return true;
+        } else if (state == null || state.isIdle()) {
+            // When idle, refresh state
+            if (comm != null) {
+                comm.requestState();
+                vibrate();
+            }
+        }
+
+        return true;
+    }
+
+    //! Middle left UP button - Pause/Resume
+    function onPreviousPage() {
         var app = getApp();
         var state = app.getWorkoutState();
 
         if (state != null) {
             if (state.isRunning()) {
                 sendCommand("PAUSE");
+                vibrate();
             } else if (state.isPaused()) {
                 sendCommand("RESUME");
-            } else if (state.isIdle()) {
-                if (comm != null) {
-                    comm.requestState();
-                }
+                vibrate();
             }
         }
-
-        vibrate();
         return true;
     }
 
-    function onPreviousPage() {
+    //! Bottom left DOWN button - Previous step
+    function onNextPage() {
         var app = getApp();
         var state = app.getWorkoutState();
 
@@ -43,24 +61,14 @@ class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
         return true;
     }
 
-    function onNextPage() {
+    //! Bottom right BACK button - Next step
+    function onBack() {
         var app = getApp();
         var state = app.getWorkoutState();
 
         if (state != null && state.isActive()) {
             sendCommand("NEXT_STEP");
             vibrate();
-        }
-        return true;
-    }
-
-    function onBack() {
-        var app = getApp();
-        var state = app.getWorkoutState();
-
-        if (state != null && state.isActive()) {
-            var dialog = new WatchUi.Confirmation("End Workout?");
-            WatchUi.pushView(dialog, new EndWorkoutConfirmDelegate(comm), WatchUi.SLIDE_UP);
             return true;
         }
 
@@ -84,17 +92,29 @@ class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
     }
 
     function onSwipe(evt) {
+        var app = getApp();
+        var state = app.getWorkoutState();
         var direction = evt.getDirection();
-        if (direction == WatchUi.SWIPE_UP) {
-            return onNextPage();
-        } else if (direction == WatchUi.SWIPE_DOWN) {
-            return onPreviousPage();
+
+        if (state != null && state.isActive()) {
+            if (direction == WatchUi.SWIPE_UP) {
+                // Swipe up = go to next step
+                sendCommand("NEXT_STEP");
+                vibrate();
+                return true;
+            } else if (direction == WatchUi.SWIPE_DOWN) {
+                // Swipe down = go to previous step
+                sendCommand("PREV_STEP");
+                vibrate();
+                return true;
+            }
         }
         return false;
     }
 
+    //! Tap on screen = Pause/Resume (same as UP button)
     function onTap(evt) {
-        return onSelect();
+        return onPreviousPage();
     }
 
     hidden function sendCommand(command) {

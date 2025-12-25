@@ -1,33 +1,25 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <iq:manifest xmlns:iq="http://www.garmin.com/xml/connectiq" version="3">
     <iq:application
         entry="AmakaFlowApp"
-        id="A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+        id="90ABF0DE-493E-47B7-B0A2-16A4D685D02A"
         launcherIcon="@Drawables.LauncherIcon"
         minSdkVersion="3.0.0"
         name="@Strings.AppName"
         type="watch-app"
-        version="1.0.0">
+        version="1.0.15">
 
         <iq:products>
-            <!-- Fenix 7 Series -->
             <iq:product id="fenix7"/>
             <iq:product id="fenix7s"/>
             <iq:product id="fenix7x"/>
             <iq:product id="fenix7pro"/>
             <iq:product id="fenix7spro"/>
             <iq:product id="fenix7xpro"/>
-
-            <!-- Fenix 8 Series -->
             <iq:product id="fenix843mm"/>
             <iq:product id="fenix847mm"/>
-            <iq:product id="fenix851mm"/>
             <iq:product id="fenix8solar47mm"/>
             <iq:product id="fenix8solar51mm"/>
-
-            <!-- Forerunner Series -->
-            <iq:product id="fr165"/>
-            <iq:product id="fr165m"/>
             <iq:product id="fr255"/>
             <iq:product id="fr255m"/>
             <iq:product id="fr255s"/>
@@ -36,28 +28,16 @@
             <iq:product id="fr265s"/>
             <iq:product id="fr955"/>
             <iq:product id="fr965"/>
-
-            <!-- Venu Series -->
             <iq:product id="venu2"/>
             <iq:product id="venu2s"/>
             <iq:product id="venu2plus"/>
             <iq:product id="venu3"/>
             <iq:product id="venu3s"/>
-            <iq:product id="venusq2"/>
-            <iq:product id="venusq2m"/>
-
-            <!-- Vivoactive -->
             <iq:product id="vivoactive5"/>
-
-            <!-- Epix -->
             <iq:product id="epix2"/>
             <iq:product id="epix2pro42mm"/>
             <iq:product id="epix2pro47mm"/>
             <iq:product id="epix2pro51mm"/>
-
-            <!-- Enduro -->
-            <iq:product id="enduro2"/>
-            <iq:product id="enduro3"/>
         </iq:products>
 
         <iq:permissions>
