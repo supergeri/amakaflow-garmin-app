@@ -34,6 +34,8 @@ class WorkoutRemoteView extends WatchUi.View {
 
         if (displayState == null || displayState.get("phase").equals("idle")) {
             drawIdleState(dc, centerX, centerY, width, height);
+        } else if (displayState.get("phase").equals("guide")) {
+            drawButtonGuide(dc, centerX, centerY, width, height);
         } else if (displayState.get("phase").equals("ended")) {
             drawCompleteState(dc, centerX, centerY, width, height, displayState);
         } else {
@@ -50,7 +52,7 @@ class WorkoutRemoteView extends WatchUi.View {
             var demoY = (height * 0.05).toNumber();
             if (demoY < 12) { demoY = 12; }
             dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(centerX, demoY, Graphics.FONT_XTINY, "DEMO " + (demoScreen + 1) + "/8", Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawText(centerX, demoY, Graphics.FONT_XTINY, "DEMO " + (demoScreen + 1) + "/9", Graphics.TEXT_JUSTIFY_CENTER);
         }
     }
 
@@ -85,10 +87,14 @@ class WorkoutRemoteView extends WatchUi.View {
         var dict = {};
 
         if (demoScreen == 0) {
+            // Button guide screen
+            dict.put("phase", "guide");
+            return dict;
+        } else if (demoScreen == 1) {
             // Idle
             dict.put("phase", "idle");
             return dict;
-        } else if (demoScreen == 1) {
+        } else if (demoScreen == 2) {
             // Rep-based step (Jumping Jacks) - Round 2
             dict.put("phase", "running");
             dict.put("stepName", "Jumping Jacks");
@@ -101,7 +107,7 @@ class WorkoutRemoteView extends WatchUi.View {
             dict.put("progress", 0.25);
             dict.put("stepProgressText", "2 of 8");
             return dict;
-        } else if (demoScreen == 2) {
+        } else if (demoScreen == 3) {
             // Timed step (Warm Up)
             dict.put("phase", "running");
             dict.put("stepName", "Warm Up");
@@ -114,7 +120,7 @@ class WorkoutRemoteView extends WatchUi.View {
             dict.put("progress", 0.125);
             dict.put("stepProgressText", "1 of 8");
             return dict;
-        } else if (demoScreen == 3) {
+        } else if (demoScreen == 4) {
             // Rep-based step (Push Ups)
             dict.put("phase", "running");
             dict.put("stepName", "Push Ups");
@@ -127,7 +133,7 @@ class WorkoutRemoteView extends WatchUi.View {
             dict.put("progress", 0.375);
             dict.put("stepProgressText", "3 of 8");
             return dict;
-        } else if (demoScreen == 4) {
+        } else if (demoScreen == 5) {
             // Timed step (Rest)
             dict.put("phase", "running");
             dict.put("stepName", "Rest");
@@ -140,7 +146,7 @@ class WorkoutRemoteView extends WatchUi.View {
             dict.put("progress", 0.5);
             dict.put("stepProgressText", "4 of 8");
             return dict;
-        } else if (demoScreen == 5) {
+        } else if (demoScreen == 6) {
             // Rep-based step (Squats)
             dict.put("phase", "running");
             dict.put("stepName", "Squats");
@@ -153,7 +159,7 @@ class WorkoutRemoteView extends WatchUi.View {
             dict.put("progress", 0.625);
             dict.put("stepProgressText", "5 of 8");
             return dict;
-        } else if (demoScreen == 6) {
+        } else if (demoScreen == 7) {
             // Paused state
             dict.put("phase", "paused");
             dict.put("stepName", "Burpees");
@@ -166,7 +172,7 @@ class WorkoutRemoteView extends WatchUi.View {
             dict.put("progress", 0.75);
             dict.put("stepProgressText", "6 of 8");
             return dict;
-        } else if (demoScreen == 7) {
+        } else if (demoScreen == 8) {
             // Complete
             dict.put("phase", "ended");
             dict.put("stepName", "Cool Down");
@@ -252,17 +258,34 @@ class WorkoutRemoteView extends WatchUi.View {
             dc.fillRoundedRectangle(barMargin, barY, progressWidth, barHeight, barHeight / 2);
         }
 
-        // Button hints
-        var hintMargin = (width * 0.05).toNumber();
-        dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(width - hintMargin, cy - (height * 0.12).toNumber(), Graphics.FONT_XTINY, "END", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(width - hintMargin, cy + (height * 0.08).toNumber(), Graphics.FONT_XTINY, "NEXT", Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(hintMargin, cy + (height * 0.08).toNumber(), Graphics.FONT_XTINY, "PREV", Graphics.TEXT_JUSTIFY_LEFT);
+        // Button indicators - colored arcs at bezel edge, centered on physical buttons
+        // All arcs are 20 degrees, centered on button position
+        // Garmin angles: 0=3 o'clock, 90=12 o'clock, 180=9 o'clock, 270=6 o'clock
+        var radius = (width / 2) - 2;
+        var arcWidth = 4;
+        dc.setPenWidth(arcWidth);
+
+        // END - RED arc centered at ~2:00 (START button) = 30°, span 20-40
+        dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
+        dc.drawArc(cx, cy, radius, Graphics.ARC_COUNTER_CLOCKWISE, 20, 40);
+
+        // NEXT - GREEN arc centered at ~4:00 (BACK button) = 330°, span 320-340
+        dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
+        dc.drawArc(cx, cy, radius, Graphics.ARC_COUNTER_CLOCKWISE, 320, 340);
+
+        // PAUSE - YELLOW/GREEN arc centered at ~9:00 (UP button) = 180°, span 170-190
         if (isPaused) {
-            dc.drawText(hintMargin, cy - (height * 0.06).toNumber(), Graphics.FONT_XTINY, "PLAY", Graphics.TEXT_JUSTIFY_LEFT);
+            dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
         } else {
-            dc.drawText(hintMargin, cy - (height * 0.06).toNumber(), Graphics.FONT_XTINY, "PAUSE", Graphics.TEXT_JUSTIFY_LEFT);
+            dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
         }
+        dc.drawArc(cx, cy, radius, Graphics.ARC_COUNTER_CLOCKWISE, 170, 190);
+
+        // PREV - BLUE arc centered at ~8:00 (DOWN button) = 210°, span 200-220
+        dc.setColor(Graphics.COLOR_BLUE, Graphics.COLOR_TRANSPARENT);
+        dc.drawArc(cx, cy, radius, Graphics.ARC_COUNTER_CLOCKWISE, 200, 220);
+
+        dc.setPenWidth(1);
     }
 
     hidden function drawIdleState(dc, cx, cy, width, height) {
@@ -270,11 +293,11 @@ class WorkoutRemoteView extends WatchUi.View {
         dc.drawText(cx, cy - (height * 0.18).toNumber(), Graphics.FONT_MEDIUM, "AmakaFlow", Graphics.TEXT_JUSTIFY_CENTER);
 
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy - (height * 0.03).toNumber(), Graphics.FONT_SMALL, "No Active", Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(cx, cy + (height * 0.07).toNumber(), Graphics.FONT_SMALL, "Workout", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, cy - (height * 0.02).toNumber(), Graphics.FONT_SMALL, "No Active", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, cy + (height * 0.08).toNumber(), Graphics.FONT_SMALL, "Workout", Graphics.TEXT_JUSTIFY_CENTER);
 
         dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, cy + (height * 0.17).toNumber(), Graphics.FONT_XTINY, "Start on iPhone", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, cy + (height * 0.20).toNumber(), Graphics.FONT_XTINY, "Start workout on iPhone", Graphics.TEXT_JUSTIFY_CENTER);
 
         // Version and connection status
         var app = getApp();
@@ -282,9 +305,49 @@ class WorkoutRemoteView extends WatchUi.View {
         if (comm != null) {
             var ph = comm.isPhoneAvailable() ? "Y" : "N";
             var ap = comm.isPhoneConnected() ? "Y" : "N";
-            dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(cx, cy + (height * 0.26).toNumber(), Graphics.FONT_XTINY, "v" + APP_VERSION + "  Ph:" + ph + "  App:" + ap, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawText(cx, cy + (height * 0.30).toNumber(), Graphics.FONT_XTINY, "v" + APP_VERSION + "  Ph:" + ph + "  App:" + ap, Graphics.TEXT_JUSTIFY_CENTER);
+        } else {
+            dc.drawText(cx, cy + (height * 0.30).toNumber(), Graphics.FONT_XTINY, "v" + APP_VERSION, Graphics.TEXT_JUSTIFY_CENTER);
         }
+    }
+
+    //! Draw button guide screen with curved arcs at bezel edge, centered on buttons
+    hidden function drawButtonGuide(dc, cx, cy, width, height) {
+        var radius = (width / 2) - 2;  // At the edge of bezel
+        var arcWidth = 4;
+
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(cx, cy - (height * 0.08).toNumber(), Graphics.FONT_SMALL, "Button", Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(cx, cy + (height * 0.02).toNumber(), Graphics.FONT_SMALL, "Guide", Graphics.TEXT_JUSTIFY_CENTER);
+
+        // All arcs are 20 degrees, centered on button position
+        // Garmin angles: 0=3 o'clock, 90=12 o'clock, 180=9 o'clock, 270=6 o'clock
+        dc.setPenWidth(arcWidth);
+
+        // END - RED arc centered at ~2:00 (START button) = 30°, span 20-40
+        dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
+        dc.drawArc(cx, cy, radius, Graphics.ARC_COUNTER_CLOCKWISE, 20, 40);
+        dc.drawText(cx + (width * 0.30).toNumber(), cy - (height * 0.22).toNumber(), Graphics.FONT_XTINY, "END", Graphics.TEXT_JUSTIFY_CENTER);
+
+        // NEXT - GREEN arc centered at ~4:00 (BACK button) = 330°, span 320-340
+        dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
+        dc.drawArc(cx, cy, radius, Graphics.ARC_COUNTER_CLOCKWISE, 320, 340);
+        dc.drawText(cx + (width * 0.28).toNumber(), cy + (height * 0.22).toNumber(), Graphics.FONT_XTINY, "NEXT", Graphics.TEXT_JUSTIFY_CENTER);
+
+        // PAUSE - YELLOW arc centered at ~9:00 (UP button) = 180°, span 170-190
+        dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
+        dc.drawArc(cx, cy, radius, Graphics.ARC_COUNTER_CLOCKWISE, 170, 190);
+        dc.drawText(cx - (width * 0.34).toNumber(), cy - (height * 0.02).toNumber(), Graphics.FONT_XTINY, "PAUSE", Graphics.TEXT_JUSTIFY_CENTER);
+
+        // PREV - BLUE arc centered at ~8:00 (DOWN button) = 210°, span 200-220
+        dc.setColor(Graphics.COLOR_BLUE, Graphics.COLOR_TRANSPARENT);
+        dc.drawArc(cx, cy, radius, Graphics.ARC_COUNTER_CLOCKWISE, 200, 220);
+        dc.drawText(cx - (width * 0.28).toNumber(), cy + (height * 0.22).toNumber(), Graphics.FONT_XTINY, "PREV", Graphics.TEXT_JUSTIFY_CENTER);
+
+        dc.setPenWidth(1);
+
+        dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(cx, cy + (height * 0.32).toNumber(), Graphics.FONT_SYSTEM_XTINY, "NEXT to continue", Graphics.TEXT_JUSTIFY_CENTER);
     }
 
     hidden function drawCompleteState(dc, cx, cy, width, height, displayState) {
@@ -349,7 +412,7 @@ class WorkoutRemoteView extends WatchUi.View {
 
     static function nextDemoScreen() {
         if (demoMode) {
-            demoScreen = (demoScreen + 1) % 8;
+            demoScreen = (demoScreen + 1) % 9;
             WatchUi.requestUpdate();
         }
     }

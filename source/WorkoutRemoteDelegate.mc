@@ -46,7 +46,7 @@ class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
         return true;
     }
 
-    //! Middle left UP button - Pause/Resume
+    //! UP button (~10 o'clock, upper left) - Pause/Resume
     function onPreviousPage() {
         var app = getApp();
         var state = app.getWorkoutState();
@@ -55,15 +55,17 @@ class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
             if (state.isRunning()) {
                 sendCommand("PAUSE");
                 vibrate();
+                return true;
             } else if (state.isPaused()) {
                 sendCommand("RESUME");
                 vibrate();
+                return true;
             }
         }
         return true;
     }
 
-    //! Bottom left DOWN button - Previous step
+    //! DOWN button (~7 o'clock, bottom left) - Previous step
     function onNextPage() {
         var app = getApp();
         var state = app.getWorkoutState();
@@ -75,7 +77,7 @@ class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
         return true;
     }
 
-    //! Bottom right BACK button - Next step
+    //! BACK button (~4 o'clock, bottom right) - Next step
     function onBack() {
         var app = getApp();
         var state = app.getWorkoutState();
