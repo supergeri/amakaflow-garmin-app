@@ -12,6 +12,7 @@ class WorkoutState {
     var stepType = "reps";
     var remainingMs = 0;
     var roundInfo = "";
+    var targetReps = 0;
     var lastUpdateTime = 0;
 
     function initialize() {
@@ -56,6 +57,11 @@ class WorkoutState {
         var roundInfoVal = msg.get("roundInfo");
         if (roundInfoVal != null) {
             roundInfo = roundInfoVal;
+        }
+
+        var targetRepsVal = msg.get("targetReps");
+        if (targetRepsVal != null) {
+            targetReps = targetRepsVal;
         }
 
         lastUpdateTime = System.getTimer();
@@ -123,6 +129,7 @@ class WorkoutState {
         stepType = "reps";
         remainingMs = 0;
         roundInfo = "";
+        targetReps = 0;
         lastUpdateTime = 0;
     }
 }
