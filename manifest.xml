@@ -7,7 +7,7 @@
         minSdkVersion="3.0.0"
         name="@Strings.AppName"
         type="watch-app"
-        version="1.0.40">
+        version="1.0.41">
 
         <iq:products>
             <iq:product id="fenix7"/>
@@ -42,6 +42,7 @@
 
         <iq:permissions>
             <iq:uses-permission id="Communications"/>
+            <iq:uses-permission id="Sensor"/>
         </iq:permissions>
 
         <iq:languages>

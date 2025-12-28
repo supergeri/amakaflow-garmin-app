@@ -47,10 +47,9 @@ class WorkoutRemoteView extends WatchUi.View {
             drawConnectionStatus(dc, width, height);
         }
 
-        // Demo mode indicator
+        // Demo mode indicator - at bottom of screen
         if (demoMode) {
-            var demoY = (height * 0.05).toNumber();
-            if (demoY < 12) { demoY = 12; }
+            var demoY = (height * 0.92).toNumber();
             dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
             dc.drawText(centerX, demoY, Graphics.FONT_XTINY, "DEMO " + (demoScreen + 1) + "/9", Graphics.TEXT_JUSTIFY_CENTER);
         }
@@ -192,8 +191,8 @@ class WorkoutRemoteView extends WatchUi.View {
 
     //! Draw active workout state - UNIFIED for both real and demo
     hidden function drawActiveState(dc, cx, cy, width, height, displayState) {
-        var stepNameY = (height * 0.15).toNumber();
-        var roundInfoY = (height * 0.26).toNumber();
+        var stepNameY = (height * 0.18).toNumber();
+        var roundInfoY = (height * 0.29).toNumber();
 
         // Step name at top
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
@@ -286,6 +285,68 @@ class WorkoutRemoteView extends WatchUi.View {
         dc.drawArc(cx, cy, radius, Graphics.ARC_COUNTER_CLOCKWISE, 200, 220);
 
         dc.setPenWidth(1);
+
+        // Draw heart rate in top-left area
+        drawHeartRate(dc, width, height);
+    }
+
+    //! Draw heart rate display centered at top (like native Garmin HR widget)
+    hidden function drawHeartRate(dc, width, height) {
+        var app = getApp();
+        var hrManager = app.getHeartRateManager();
+
+        var centerX = width / 2;
+        var heartY = (height * 0.04).toNumber();
+        var hrValueY = (height * 0.06).toNumber();
+
+        var hr = null;
+        var hrAvailable = false;
+
+        if (hrManager != null) {
+            hr = hrManager.getCurrentHR();
+            hrAvailable = hrManager.isAvailable();
+        }
+
+        // In demo mode, show simulated HR
+        if (demoMode) {
+            hr = 142;
+            hrAvailable = true;
+        }
+
+        // Draw heart icon (small red heart shape)
+        var heartSize = (width * 0.02).toNumber();
+        if (heartSize < 5) { heartSize = 5; }
+
+        if (hrAvailable && hr != null) {
+            // Draw red heart icon
+            dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
+            // Simple heart using two circles and a triangle
+            dc.fillCircle(centerX - heartSize/2, heartY, heartSize);
+            dc.fillCircle(centerX + heartSize/2, heartY, heartSize);
+            // Triangle for bottom of heart
+            dc.fillPolygon([
+                [centerX - heartSize - heartSize/2, heartY],
+                [centerX + heartSize + heartSize/2, heartY],
+                [centerX, heartY + heartSize * 2]
+            ]);
+
+            // Draw HR value in white below heart (smaller font)
+            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(centerX, hrValueY + heartSize, Graphics.FONT_TINY, hr.toString(), Graphics.TEXT_JUSTIFY_CENTER);
+        } else {
+            // Draw gray heart icon
+            dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
+            dc.fillCircle(centerX - heartSize/2, heartY, heartSize);
+            dc.fillCircle(centerX + heartSize/2, heartY, heartSize);
+            dc.fillPolygon([
+                [centerX - heartSize - heartSize/2, heartY],
+                [centerX + heartSize + heartSize/2, heartY],
+                [centerX, heartY + heartSize * 2]
+            ]);
+
+            // Draw -- in gray below heart
+            dc.drawText(centerX, hrValueY + heartSize, Graphics.FONT_TINY, "--", Graphics.TEXT_JUSTIFY_CENTER);
+        }
     }
 
     hidden function drawIdleState(dc, cx, cy, width, height) {
