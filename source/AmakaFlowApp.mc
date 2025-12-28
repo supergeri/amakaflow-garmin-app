@@ -6,13 +6,14 @@ using Toybox.Lang;
 using Toybox.Attention;
 
 //! App version - update here and in manifest.xml
-const APP_VERSION = "1.0.40";
+const APP_VERSION = "1.0.41";
 
 //! Main application class for AmakaFlow Workout Remote
 class AmakaFlowApp extends Application.AppBase {
 
     var commManager;
     var workoutState;
+    var heartRateManager;
     var messageCount = 0;
 
     function initialize() {
@@ -21,6 +22,7 @@ class AmakaFlowApp extends Application.AppBase {
         System.println("[APP] App UUID: 90ABF0DE-493E-47B7-B0A2-16A4D685D02A");
         commManager = new CommManager();
         workoutState = new WorkoutState();
+        heartRateManager = new HeartRateManager(commManager);
         System.println("[APP] Initialization complete");
     }
 
@@ -53,6 +55,11 @@ class AmakaFlowApp extends Application.AppBase {
     function onStop(state) {
         System.println("[APP] ===== onStop called =====");
         System.println("[APP] Messages received this session: " + messageCount);
+
+        // Stop HR streaming on app exit to save battery
+        if (heartRateManager != null) {
+            heartRateManager.stopStreaming();
+        }
     }
 
     function getInitialView() {
@@ -79,7 +86,23 @@ class AmakaFlowApp extends Application.AppBase {
             if (action != null && action.equals("stateUpdate")) {
                 System.println("[APP] Processing stateUpdate...");
                 if (workoutState != null) {
+                    var wasActive = workoutState.isActive();
                     workoutState.update(data);
+                    var isNowActive = workoutState.isActive();
+
+                    // Manage HR streaming based on workout state
+                    if (heartRateManager != null) {
+                        if (!wasActive && isNowActive) {
+                            // Workout just started - start HR streaming
+                            System.println("[APP] Workout started, starting HR streaming");
+                            heartRateManager.startStreaming();
+                        } else if (wasActive && !isNowActive) {
+                            // Workout just ended - stop HR streaming
+                            System.println("[APP] Workout ended, stopping HR streaming");
+                            heartRateManager.stopStreaming();
+                        }
+                    }
+
                     WatchUi.requestUpdate();
                     System.println("[APP] UI updated with new state");
                 }
@@ -114,6 +137,10 @@ class AmakaFlowApp extends Application.AppBase {
 
     function getCommManager() {
         return commManager;
+    }
+
+    function getHeartRateManager() {
+        return heartRateManager;
     }
 }
 

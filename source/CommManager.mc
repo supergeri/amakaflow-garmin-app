@@ -84,6 +84,48 @@ class CommManager {
         transmitMessage(message);
     }
 
+    //! Send heart rate data to iOS
+    function sendHeartRate(hr) {
+        // Don't log every HR send to reduce noise (every 2 seconds)
+        var message = {
+            "action" => "heartRate",
+            "heartRate" => hr,
+            "available" => true,
+            "timestamp" => System.getTimer()
+        };
+        transmitMessageQuiet(message);
+    }
+
+    //! Send heart rate unavailable status to iOS
+    function sendHeartRateUnavailable(reason) {
+        var message = {
+            "action" => "heartRate",
+            "heartRate" => 0,
+            "available" => false,
+            "reason" => reason,
+            "timestamp" => System.getTimer()
+        };
+        transmitMessageQuiet(message);
+    }
+
+    //! Quiet transmit for frequent messages like HR (less logging)
+    hidden function transmitMessageQuiet(message) {
+        transmitAttempts++;
+        lastTransmitTime = System.getTimer();
+
+        if (!isPhoneAvailable()) {
+            lastError = "Phone not connected";
+            return;
+        }
+
+        try {
+            Communications.transmit(message, null, new CommListener(self));
+        } catch (ex) {
+            lastError = "Exception: " + ex.getErrorMessage();
+            onTransmitError();
+        }
+    }
+
     hidden function transmitMessage(message) {
         transmitAttempts++;
         lastTransmitTime = System.getTimer();
