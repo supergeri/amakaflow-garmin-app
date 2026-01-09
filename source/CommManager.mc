@@ -108,6 +108,34 @@ class CommManager {
         transmitMessageQuiet(message);
     }
 
+    //! AMA-288: Send set log with weight to iOS
+    function sendSetLog(weight, unit) {
+        System.println("[COMM] sendSetLog called: weight=" + weight + " unit=" + unit);
+        logPhoneStatus();
+
+        var message = {
+            "action" => "logSet",
+            "weight" => weight,
+            "unit" => unit,
+            "timestamp" => System.getTimer()
+        };
+        transmitMessage(message);
+    }
+
+    //! AMA-288: Send set log without weight (skip)
+    function sendSetLogSkip() {
+        System.println("[COMM] sendSetLogSkip called");
+        logPhoneStatus();
+
+        var message = {
+            "action" => "logSet",
+            "weight" => null,
+            "unit" => null,
+            "timestamp" => System.getTimer()
+        };
+        transmitMessage(message);
+    }
+
     //! Quiet transmit for frequent messages like HR (less logging)
     hidden function transmitMessageQuiet(message) {
         transmitAttempts++;

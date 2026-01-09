@@ -15,6 +15,12 @@ class WorkoutState {
     var targetReps = 0;
     var lastUpdateTime = 0;
 
+    // AMA-288: Weight capture fields
+    var suggestedWeight = null;  // Suggested weight from phone (last used)
+    var weightUnit = "lbs";      // "lbs" or "kg"
+    var setNumber = 1;           // Current set number (1-based)
+    var totalSets = 1;           // Total sets for this exercise
+
     function initialize() {
     }
 
@@ -62,6 +68,27 @@ class WorkoutState {
         var targetRepsVal = msg.get("targetReps");
         if (targetRepsVal != null) {
             targetReps = targetRepsVal;
+        }
+
+        // AMA-288: Parse weight capture fields
+        var suggestedWeightVal = msg.get("suggestedWeight");
+        if (suggestedWeightVal != null) {
+            suggestedWeight = suggestedWeightVal;
+        }
+
+        var weightUnitVal = msg.get("weightUnit");
+        if (weightUnitVal != null) {
+            weightUnit = weightUnitVal;
+        }
+
+        var setNumberVal = msg.get("setNumber");
+        if (setNumberVal != null) {
+            setNumber = setNumberVal;
+        }
+
+        var totalSetsVal = msg.get("totalSets");
+        if (totalSetsVal != null) {
+            totalSets = totalSetsVal;
         }
 
         lastUpdateTime = System.getTimer();
@@ -131,5 +158,10 @@ class WorkoutState {
         roundInfo = "";
         targetReps = 0;
         lastUpdateTime = 0;
+        // AMA-288: Reset weight fields
+        suggestedWeight = null;
+        weightUnit = "lbs";
+        setNumber = 1;
+        totalSets = 1;
     }
 }

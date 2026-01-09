@@ -1,6 +1,7 @@
 using Toybox.WatchUi;
 using Toybox.Attention;
 using Toybox.System;
+using Toybox.Lang;
 
 //! Input delegate for handling button presses
 class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
@@ -78,17 +79,82 @@ class WorkoutRemoteDelegate extends WatchUi.BehaviorDelegate {
     }
 
     //! BACK button (~4 o'clock, bottom right) - Next step
+    //! AMA-288: For reps steps, show weight input first
     function onBack() {
+        // AMA-288: Demo mode - show weight input for reps screens
+        if (WorkoutRemoteView.demoMode) {
+            var demoScreen = WorkoutRemoteView.demoScreen;
+            // Demo screens 2, 4, 6, 7 are reps exercises
+            if (demoScreen == 2 || demoScreen == 4 || demoScreen == 6 || demoScreen == 7) {
+                showDemoWeightInput(demoScreen);
+                vibrate();
+                return true;
+            }
+            // For other demo screens, just cycle to next
+            WorkoutRemoteView.nextDemoScreen();
+            vibrate();
+            return true;
+        }
+
         var app = getApp();
         var state = app.getWorkoutState();
 
         if (state != null && state.isActive()) {
+            // AMA-288: For reps steps, show weight input before advancing
+            if (state.stepType.equals("reps")) {
+                showWeightInput(state);
+                vibrate();
+                return true;
+            }
+
+            // For timed/other steps, advance immediately
             sendCommand("NEXT_STEP");
             vibrate();
             return true;
         }
 
         return false;
+    }
+
+    //! AMA-288: Show weight input view for reps exercises
+    hidden function showWeightInput(state) {
+        System.println("[UI] Showing weight input for: " + state.stepName);
+        var weightView = new WeightInputView(state);
+        var weightDelegate = new WeightInputDelegate(weightView, comm, new WeightInputCallback(comm));
+        WatchUi.pushView(weightView, weightDelegate, WatchUi.SLIDE_UP);
+    }
+
+    //! AMA-288: Show weight input with demo data
+    hidden function showDemoWeightInput(demoScreen) {
+        System.println("[UI] Showing demo weight input for screen: " + demoScreen);
+        // Create a demo state for testing
+        var demoState = new WorkoutState();
+        if (demoScreen == 2) {
+            demoState.stepName = "Jumping Jacks";
+            demoState.suggestedWeight = 0.0;
+            demoState.setNumber = 2;
+            demoState.totalSets = 3;
+        } else if (demoScreen == 4) {
+            demoState.stepName = "Push Ups";
+            demoState.suggestedWeight = 0.0;
+            demoState.setNumber = 1;
+            demoState.totalSets = 3;
+        } else if (demoScreen == 6) {
+            demoState.stepName = "Squats";
+            demoState.suggestedWeight = 135.0;
+            demoState.setNumber = 3;
+            demoState.totalSets = 3;
+        } else if (demoScreen == 7) {
+            demoState.stepName = "Burpees";
+            demoState.suggestedWeight = 0.0;
+            demoState.setNumber = 2;
+            demoState.totalSets = 3;
+        }
+        demoState.weightUnit = "lbs";
+
+        var weightView = new WeightInputView(demoState);
+        var weightDelegate = new WeightInputDelegate(weightView, comm, new DemoWeightInputCallback());
+        WatchUi.pushView(weightView, weightDelegate, WatchUi.SLIDE_UP);
     }
 
     //! Menu button (long press LIGHT) - Toggle demo mode or refresh state
@@ -264,5 +330,54 @@ class EndWorkoutConfirmDelegate extends WatchUi.ConfirmationDelegate {
             }
         }
         return true;
+    }
+}
+
+//! AMA-288: Callback for weight input completion
+class WeightInputCallback extends Lang.Object {
+
+    var comm;
+
+    function initialize(commManager) {
+        Object.initialize();
+        comm = commManager;
+    }
+
+    //! Called when weight input is complete (logged or skipped)
+    function invoke() {
+        System.println("[WEIGHT] Weight input complete, advancing to next step");
+
+        // Pop the weight input view
+        WatchUi.popView(WatchUi.SLIDE_DOWN);
+
+        // Send next step command to iOS
+        if (comm != null) {
+            comm.sendCommand("NEXT_STEP");
+        }
+
+        // Request UI update
+        WatchUi.requestUpdate();
+    }
+}
+
+//! AMA-288: Callback for demo mode weight input (no real commands sent)
+class DemoWeightInputCallback extends Lang.Object {
+
+    function initialize() {
+        Object.initialize();
+    }
+
+    //! Called when demo weight input is complete
+    function invoke() {
+        System.println("[WEIGHT] Demo weight input complete");
+
+        // Pop the weight input view
+        WatchUi.popView(WatchUi.SLIDE_DOWN);
+
+        // Advance demo screen
+        WorkoutRemoteView.nextDemoScreen();
+
+        // Request UI update
+        WatchUi.requestUpdate();
     }
 }
